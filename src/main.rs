@@ -7,11 +7,11 @@ use hellohttp::ThreadPool;
 use std::io::prelude::*;
 use std::net::TcpListener;
 use std::net::TcpStream;
-use std::fs::File;
+// use std::fs::File;
 use std::str;
 use std::sync::{Mutex, Arc};
-use std::thread;
-use std::time::Duration;
+// use std::thread;
+// use std::time::Duration;
 
 fn main() {
     let mut game = GameMap::new();

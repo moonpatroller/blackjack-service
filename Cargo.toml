@@ -1,11 +1,12 @@
 [package]
 name = "casino"
 version = "0.1.0"
-authors = ["carenajosh <josh.goldstein@carenamd.com>"]
+authors = ["moonpatroller"]
 
 [dependencies]
 blackjack = { path = "blackjack" }
 hellohttp = { path = "hellohttp" }
+tictactoe = { path = "tictactoe" }
 
 [workspace]
 
