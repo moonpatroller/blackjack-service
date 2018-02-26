@@ -132,13 +132,10 @@ impl Blackjack {
     }
 
     pub fn is_player_done(&self) -> bool {
-        println!("is_player_done, self.player_points(): {}", self.player_points());
-        println!("is_player_done: {}", self.player_points() >= 21 || self.is_dealer_done());
         self.player_points() >= 21 || self.is_dealer_done()
     }
 
     pub fn is_dealer_done(&self) -> bool {
-        println!("is_dealer_done: {}", self.dealer_points() > 16);
         self.dealer_points() > 16
     }
 

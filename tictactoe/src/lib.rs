@@ -56,18 +56,52 @@ mod tests {
             assert_eq!(false, ttt.can_win(Piece::O, index));
         }
     }
-    #[test]
-    fn just_printing() {
-        let mut ttt = TicTacToe::new();
-        ttt.player_move(0);
-        println!("{:?}, winner {:?}", ttt, ttt.did_win());
-        ttt.player_move(4);
-        println!("{:?}, winner {:?}", ttt, ttt.did_win());
-        ttt.player_move(6);
-        println!("{:?}, winner {:?}", ttt, ttt.did_win());
-        // ttt.player_move(1);
-        // println!("{:?}, winner {:?}", ttt, ttt.did_win());
+}
+
+use std::collections::HashMap;
+use std::fmt;
+
+#[derive(Debug)]
+pub struct TicTacToeGameMap {
+    id: usize,
+    games: HashMap<usize, TicTacToe>
+}
+
+impl TicTacToeGameMap {
+    pub fn new() -> TicTacToeGameMap {
+        TicTacToeGameMap {
+            id: 0,
+            games: HashMap::new()
+        }
     }
+
+    pub fn move_game(&mut self, id: usize, spot: usize) -> String {
+        self.games.get_mut(&id).map(|b| {
+            b.player_move(spot);
+            Self::to_json(id, &*b)
+        }).unwrap_or("{}".to_string())
+    }
+
+    fn to_json(id: usize, game: &TicTacToe) -> String {
+        match game.did_win() {
+            Piece::O => format!("{{id: {}, game: \"{}\", status: \"You won!\"}}", id, game),
+            Piece::X => format!("{{id: {}, game: \"{}\", status: \"You lost!\"}}", id, game),
+            _ => format!("{{id: {}, game: \"{}\", status: \"Your move.\"}}", id, game),
+        }
+    }
+
+    pub fn finish_game(&mut self, id: usize) -> String {
+        self.games.remove(&id);
+        String::from("")
+    }
+
+    pub fn create_game(&mut self) -> String {
+        self.id += 1;
+        let b = TicTacToe::new();
+        let entry = self.games.entry(self.id);
+        Self::to_json(self.id, entry.or_insert(b))
+    }
+
 }
 
 #[derive(Debug,Copy,Clone,PartialEq,Eq)]
@@ -83,6 +117,22 @@ const PLAYER_PIECE: Piece = Piece::O;
 #[derive(Debug)]
 pub struct TicTacToe {
     board: [Piece; 9]
+}
+
+impl fmt::Display for TicTacToe {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Write strictly the first element into the supplied output
+        // stream: `f`. Returns `fmt::Result` which indicates whether the
+        // operation succeeded or failed. Note that `write!` uses syntax which
+        // is very similar to `println!`.
+        write!(f, "[{}]", self.board.iter().fold(String::new(), |acc, &p| {
+            match p {
+                Piece::X => acc + "X , ",
+                Piece::O => acc + "O , ",
+                Piece::None => acc + " , ",
+            }
+        }))
+    }
 }
 
 impl TicTacToe {
@@ -164,8 +214,6 @@ impl TicTacToe {
     }
 
     fn can_win(&self, my_piece: Piece, index: usize) -> bool {
-        // println!("can_win testing index {:?}", index);
-
         if my_piece == Piece::None || self.board[index] != Piece::None {
             return false;
         }
@@ -185,8 +233,6 @@ impl TicTacToe {
         let index_on_down_diag = index == 0 || index == 4 || index == 8;
         let index_on_up_diag = index == 6 || index == 4 || index == 2;
 
-        // println!("{:?}, {:?}, {:?}, {:?}, {:?}", 
-        //     my_piece, row_can_win, col_can_win, self.can_win_down_diag(my_piece), self.can_win_up_diag(my_piece));
         row_can_win || col_can_win || 
             (index_on_down_diag && self.can_win_down_diag(my_piece)) || 
             (index_on_up_diag && self.can_win_up_diag(my_piece))
@@ -238,31 +284,4 @@ impl TicTacToe {
         diag == &[my_piece, Piece::None, my_piece] ||
         diag == &[my_piece, my_piece, Piece::None]
     }
-
-    // fn can_win_row(&self, player_piece: Piece, row_num: u8) -> bool {
-    //     let start_num = row_num as usize * 3;
-    //     let end_num = start_num as usize + 3;
-    //     let row = &self.board[start_num .. end_num];
-    //     row == &[Piece::None, player_piece, player_piece] ||
-    //     row == &[player_piece, Piece::None, player_piece] ||
-    //     row == &[player_piece, player_piece, Piece::None]
-    // }
-
-    // fn can_win_col(&self, player_piece: Piece, col_num: u8) -> bool {
-    //     let start_num = col_num as usize;
-    //     let row = &[self.board[start_num], self.board[start_num + 3], self.board[start_num + 6]];
-    //     row == &[Piece::None, player_piece, player_piece] ||
-    //     row == &[player_piece, Piece::None, player_piece] ||
-    //     row == &[player_piece, player_piece, Piece::None]
-    // }
-
-    // assert_eq!(true, ttt.can_win_row(Piece::None, row));
-    // assert_eq!(false, ttt.can_win_row(Piece::X, row));
-    // assert_eq!(false, ttt.can_win_row(Piece::O, row));
-
-    // assert_eq!(true, ttt.can_win_col(Piece::None, row));
-    // assert_eq!(false, ttt.can_win_col(Piece::X, row));
-    // assert_eq!(false, ttt.can_win_col(Piece::O, row));
 }
-
-
